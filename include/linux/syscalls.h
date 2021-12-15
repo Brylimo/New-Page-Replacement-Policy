@@ -1275,6 +1275,8 @@ asmlinkage long sys_ni_syscall(void);
 asmlinkage long sys_my_syscall(void);
 
 asmlinkage long sys_prime_syscall(void);
+
+asmlinkage long sys_mm_statistics_syscall(void);
 #endif /* CONFIG_ARCH_HAS_SYSCALL_WRAPPER */
 
 

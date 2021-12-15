@@ -416,5 +416,6 @@
 
 548	64	my_syscall		sys_my_syscall
 549	common	prime_syscall		sys_prime_syscall
+550	common	mm_statistics_syscall	sys_mm_statistics_syscall
 # This is the end of the legacy x32 range.  Numbers 548 and above are
 # not special and are not to be used for x32-specific syscalls.
