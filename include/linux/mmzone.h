@@ -311,6 +311,12 @@ struct lruvec {
 	unsigned long			refaults[ANON_AND_FILE];
 	/* Various lruvec state flags (enum lruvec_flags) */
 	unsigned long			flags;
+
+	// me
+	unsigned long			active_anon_to_inactive;
+	unsigned long			inactive_anon_to_active;
+	unsigned long			active_file_to_inactive;
+	unsigned long			inactive_file_to_active;
 #ifdef CONFIG_MEMCG
 	struct pglist_data *pgdat;
 #endif

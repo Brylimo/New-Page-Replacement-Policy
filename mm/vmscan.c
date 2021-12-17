@@ -2420,6 +2420,12 @@ static void shrink_active_list(unsigned long nr_to_scan,
 
 	nr_activate = move_pages_to_lru(lruvec, &l_active);
 	nr_deactivate = move_pages_to_lru(lruvec, &l_inactive);
+	
+	//
+	if (file) 
+		lruvec->active_file_to_inactive+=nr_deactivate;
+	else 
+		lruvec->active_anon_to_inactive+=nr_deactivate;
 	/* Keep all free pages in l_active list */
 	list_splice(&l_inactive, &l_active);
 

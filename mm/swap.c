@@ -299,11 +299,18 @@ static void __activate_page(struct page *page, struct lruvec *lruvec)
 {
 	if (!PageActive(page) && !PageUnevictable(page)) {
 		int nr_pages = thp_nr_pages(page);
+		enum lru_list lru = page_lru(page); //
 
 		del_page_from_lru_list(page, lruvec);
 		SetPageActive(page);
 		add_page_to_lru_list(page, lruvec);
 		trace_mm_lru_activate(page);
+		
+		//
+		if (is_file_lru(lru)) 
+			lruvec->inactive_file_to_active++;
+		else
+			lruvec->inactive_anon_to_active++;
 
 		__count_vm_events(PGACTIVATE, nr_pages);
 		__count_memcg_events(lruvec_memcg(lruvec), PGACTIVATE,
@@ -363,6 +370,10 @@ static void __lru_cache_activate_page(struct page *page)
 {
 	struct pagevec *pvec;
 	int i;
+	
+	//
+	struct pglist_data *pgdat;
+	enum lru_list lru;
 
 	local_lock(&lru_pvecs.lock);
 	pvec = this_cpu_ptr(&lru_pvecs.lru_add);
@@ -382,6 +393,15 @@ static void __lru_cache_activate_page(struct page *page)
 
 		if (pagevec_page == page) {
 			SetPageActive(page);
+			
+			//
+			pgdat = page_pgdat(page);
+			lru = page_lru(page);
+			if(is_file_lru(lru)) {
+				pgdat->__lruvec.inactive_file_to_active++;
+			} else {
+				pgdat->__lruvec.inactive_anon_to_active++;
+			}
 			break;
 		}
 	}
