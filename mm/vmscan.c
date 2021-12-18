@@ -170,7 +170,8 @@ struct scan_control {
 #else
 #define prefetchw_prev_lru_page(_page, _base, _field) do { } while (0)
 #endif
-
+//
+extern int gold_key;
 /*
  * From 0 .. 200.  Higher means more swappy.
  */
@@ -2356,7 +2357,7 @@ static void shrink_active_list(unsigned long nr_to_scan,
 	unsigned nr_rotated = 0;
 	int file = is_file_lru(lru);
 	struct pglist_data *pgdat = lruvec_pgdat(lruvec);
-
+	
 	lru_add_drain();
 
 	spin_lock_irq(&lruvec->lru_lock);
@@ -3615,7 +3616,7 @@ unsigned long try_to_free_pages(struct zonelist *zonelist, int order,
 		.may_unmap = 1,
 		.may_swap = 1,
 	};
-
+	
 	/*
 	 * scan_control uses s8 fields for order, priority, and reclaim_idx.
 	 * Confirm they are large enough for max values.
