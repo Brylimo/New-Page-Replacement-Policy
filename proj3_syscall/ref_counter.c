@@ -10,7 +10,8 @@
 #include <linux/cpuset.h>
 #include <linux/workqueue.h>
 
-#define TIMER_TIMEOUT	1
+#define TIMER_TIMEOUT		1
+#define MY_MAXIMUM_VALUE 	20
 
 int gold_key;
 static struct timer_list timer;
