@@ -27,7 +27,7 @@ void num_ref_pages(struct list_head *src) {
 		if ((temp->flags & (1 << PG_referenced))) {
 			page_count++;
 		}
-		printk("ref %d\n", page_ref_count(temp));
+		//printk("ref %d\n", page_ref_count(temp));
 	}
 
 	printk(KERN_INFO "The current number of pages those reference bits are set : %d\n", page_count);

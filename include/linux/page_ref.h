@@ -15,6 +15,7 @@ DECLARE_TRACEPOINT(page_ref_mod_unless);
 DECLARE_TRACEPOINT(page_ref_freeze);
 DECLARE_TRACEPOINT(page_ref_unfreeze);
 
+extern int gold_key;
 #ifdef CONFIG_DEBUG_PAGE_REF
 
 /*
@@ -90,9 +91,11 @@ static inline void init_page_count(struct page *page)
 
 static inline void page_ref_add(struct page *page, int nr)
 {
-	atomic_add(nr, &page->_refcount);
-	if (page_ref_tracepoint_active(page_ref_mod))
-		__page_ref_mod(page, nr);
+	if (page_ref_count(page) < gold_key) {
+		atomic_add(nr, &page->_refcount);
+		if (page_ref_tracepoint_active(page_ref_mod))
+			__page_ref_mod(page, nr);
+	}
 }
 
 static inline void page_ref_sub(struct page *page, int nr)
@@ -113,9 +116,11 @@ static inline int page_ref_sub_return(struct page *page, int nr)
 
 static inline void page_ref_inc(struct page *page)
 {
-	atomic_inc(&page->_refcount);
-	if (page_ref_tracepoint_active(page_ref_mod))
-		__page_ref_mod(page, 1);
+	if (page_ref_count(page) < gold_key) {
+		atomic_inc(&page->_refcount);
+		if (page_ref_tracepoint_active(page_ref_mod))
+			__page_ref_mod(page, 1);
+	}
 }
 
 static inline void page_ref_dec(struct page *page)
@@ -136,11 +141,14 @@ static inline int page_ref_sub_and_test(struct page *page, int nr)
 
 static inline int page_ref_inc_return(struct page *page)
 {
-	int ret = atomic_inc_return(&page->_refcount);
+	if (page_ref_count(page) < gold_key) {
+		int ret = atomic_inc_return(&page->_refcount);
 
-	if (page_ref_tracepoint_active(page_ref_mod_and_return))
-		__page_ref_mod_and_return(page, 1, ret);
-	return ret;
+		if (page_ref_tracepoint_active(page_ref_mod_and_return))
+			__page_ref_mod_and_return(page, 1, ret);
+		return ret;
+	}
+	return gold_key;
 }
 
 static inline int page_ref_dec_and_test(struct page *page)

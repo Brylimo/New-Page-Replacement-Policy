@@ -170,8 +170,7 @@ struct scan_control {
 #else
 #define prefetchw_prev_lru_page(_page, _base, _field) do { } while (0)
 #endif
-//
-extern int gold_key;
+
 /*
  * From 0 .. 200.  Higher means more swappy.
  */

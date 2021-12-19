@@ -9,11 +9,12 @@
 #include <linux/list.h>
 #include <linux/cpuset.h>
 #include <linux/workqueue.h>
+#include <linux/swap.h>
 
 #define TIMER_TIMEOUT		1
-#define MY_MAXIMUM_VALUE 	20
+#define MY_MAXIMUM_VALUE 	200
 
-int gold_key;
+int gold_key = MY_MAXIMUM_VALUE;
 static struct timer_list timer;
 struct work_struct my_counter_work;
 
@@ -32,6 +33,8 @@ void my_work_handler(struct work_struct *work)
 	}	
 
 	lruvec = &current_pglist->__lruvec;
+	
+	lru_add_drain();
 
 	spin_lock_irq(&lruvec->lru_lock);
 	
@@ -40,6 +43,10 @@ void my_work_handler(struct work_struct *work)
 		src = &lruvec->lists[lru];
 		list_for_each_entry(temp, src, lru) {
 			if ((temp->flags & (1 << PG_referenced))) {
+				if (page_ref_count(temp) >= MY_MAXIMUM_VALUE)
+				{
+					continue;
+				}
 				page_ref_add(temp, 1);
 				temp->flags &= ~(1UL << PG_referenced);
 			}
@@ -59,7 +66,6 @@ SYSCALL_DEFINE0(ref_counter_syscall)
 {
 	timer_setup(&timer, timer_handler, 0);
 	INIT_WORK(&my_counter_work, my_work_handler);
-	gold_key = 1;
 	mod_timer(&timer, jiffies + TIMER_TIMEOUT*HZ);
 
 	return 0;
