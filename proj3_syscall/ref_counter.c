@@ -8,7 +8,6 @@
 #include <linux/memcontrol.h>
 #include <linux/list.h>
 #include <linux/cpuset.h>
-#include <linux/workqueue.h>
 #include <linux/swap.h>
 
 #define TIMER_TIMEOUT		1
@@ -16,9 +15,8 @@
 
 int gold_key = MY_MAXIMUM_VALUE;
 static struct timer_list timer;
-struct work_struct my_counter_work;
 
-void my_work_handler(struct work_struct *work)
+static void timer_handler(struct timer_list *tl)
 {
 	struct pglist_data *current_pglist = NULL;
 	struct lruvec *lruvec = NULL;
@@ -52,20 +50,13 @@ void my_work_handler(struct work_struct *work)
 			}
 		}
 	}
-
 	spin_unlock_irq(&lruvec->lru_lock);
-}
-
-static void timer_handler(struct timer_list *tl)
-{
-	schedule_work(&my_counter_work);
 	mod_timer(&timer, jiffies + TIMER_TIMEOUT*HZ);
 }
 
 SYSCALL_DEFINE0(ref_counter_syscall)
 {
 	timer_setup(&timer, timer_handler, 0);
-	INIT_WORK(&my_counter_work, my_work_handler);
 	mod_timer(&timer, jiffies + TIMER_TIMEOUT*HZ);
 
 	return 0;
