@@ -2457,15 +2457,13 @@ unsigned long reclaim_pages(struct list_head *page_list)
 		.no_demotion = 1,
 	};
 	
-	struct pglist_data *pgdat;
-	enum lru_list lru;
+	struct pglist_data *current_pglist = NULL;
+	struct lruvec *my_lruvec = NULL;
 	noreclaim_flag = memalloc_noreclaim_save();
 
 	while (!list_empty(page_list)) {
 		page = lru_to_page(page_list);
-		/*pgdat = page_pgdat(page);
-		lru = page_lru(page);
-		pgdat->__lruvec.evic_count++;*/
+
 		if (nid == NUMA_NO_NODE) {
 			nid = page_to_nid(page);
 			INIT_LIST_HEAD(&node_page_list);
@@ -2502,6 +2500,10 @@ unsigned long reclaim_pages(struct list_head *page_list)
 
 	memalloc_noreclaim_restore(noreclaim_flag);
 
+	current_pglist = NODE_DATA(0);
+
+	my_lruvec = &current_pglist->__lruvec;
+	my_lruvec->evic_count+=nr_reclaimed;
 	return nr_reclaimed;
 }
 
@@ -3609,6 +3611,8 @@ unsigned long try_to_free_pages(struct zonelist *zonelist, int order,
 				gfp_t gfp_mask, nodemask_t *nodemask)
 {
 	unsigned long nr_reclaimed;
+	struct pglist_data *current_pglist = NULL;
+	struct lruvec *my_lruvec = NULL;
 	struct scan_control sc = {
 		.nr_to_reclaim = SWAP_CLUSTER_MAX,
 		.gfp_mask = current_gfp_context(gfp_mask),
@@ -3645,6 +3649,10 @@ unsigned long try_to_free_pages(struct zonelist *zonelist, int order,
 	trace_mm_vmscan_direct_reclaim_end(nr_reclaimed);
 	set_task_reclaim_state(current, NULL);
 
+	current_pglist = NODE_DATA(0);
+	
+	my_lruvec = &current_pglist->__lruvec;
+	my_lruvec->evic_count+=nr_reclaimed;
 	return nr_reclaimed;
 }
 
