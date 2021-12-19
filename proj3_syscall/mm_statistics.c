@@ -85,6 +85,8 @@ void show_list(void)
 	num_ref_pages(&lruvec->lists[LRU_INACTIVE_ANON]);
 	cum_num_page_moved(lruvec, LRU_INACTIVE_ANON);
 
+	printk(KERN_INFO "The cumulative number of eviction : %lu\n", lruvec->evic_count);
+
 	spin_unlock_irq(&current_pglist->__lruvec.lru_lock);
 
 	printk(KERN_INFO "\n");

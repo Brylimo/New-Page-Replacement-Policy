@@ -374,7 +374,7 @@ static void __lru_cache_activate_page(struct page *page)
 	//
 	struct pglist_data *pgdat;
 	enum lru_list lru;
-
+	
 	local_lock(&lru_pvecs.lock);
 	pvec = this_cpu_ptr(&lru_pvecs.lru_add);
 
@@ -538,6 +538,7 @@ static void lru_deactivate_file_fn(struct page *page, struct lruvec *lruvec)
 		return;
 
 	del_page_from_lru_list(page, lruvec);
+	//lruvec->evic_count++;
 	ClearPageActive(page);
 	ClearPageReferenced(page);
 
@@ -571,6 +572,7 @@ static void lru_deactivate_fn(struct page *page, struct lruvec *lruvec)
 		int nr_pages = thp_nr_pages(page);
 
 		del_page_from_lru_list(page, lruvec);
+		//lruvec->evic_count++;
 		ClearPageActive(page);
 		ClearPageReferenced(page);
 		add_page_to_lru_list(page, lruvec);
@@ -586,7 +588,6 @@ static void lru_lazyfree_fn(struct page *page, struct lruvec *lruvec)
 	if (PageAnon(page) && PageSwapBacked(page) &&
 	    !PageSwapCache(page) && !PageUnevictable(page)) {
 		int nr_pages = thp_nr_pages(page);
-
 		del_page_from_lru_list(page, lruvec);
 		ClearPageActive(page);
 		ClearPageReferenced(page);

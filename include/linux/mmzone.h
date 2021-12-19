@@ -317,6 +317,8 @@ struct lruvec {
 	unsigned long			inactive_anon_to_active;
 	unsigned long			active_file_to_inactive;
 	unsigned long			inactive_file_to_active;
+
+	unsigned long			evic_count;
 #ifdef CONFIG_MEMCG
 	struct pglist_data *pgdat;
 #endif
